@@ -1,31 +1,46 @@
 // /src/app/components/SpotifyPlayer.tsx
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { SpotifyPlayerProps } from "@/types/SpotifyPlayerProps";
-import { fetchSpotifyOEmbedData } from "@/utils/spotifyUtils";
 
 const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({ spotifyUrl }) => {
   const [oEmbedHtml, setOEmbedHtml] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchOEmbedData = async () => {
       try {
-        const html = await fetchSpotifyOEmbedData(spotifyUrl);
-        setOEmbedHtml(html);
-      } catch (error) {
-        console.error("Error fetching Spotify oEmbed data:", error);
+        const response = await fetch(`/api/spotify-oembed?url=${encodeURIComponent(spotifyUrl)}`);
+        if (!response.ok) throw new Error("Failed to fetch Spotify oEmbed data");
+
+        const data = await response.json();
+        setOEmbedHtml(data.html);
+      } catch (err) {
+        console.error("Error fetching Spotify oEmbed data:", err);
+        setError("Failed to load Spotify player.");
       }
     };
 
-    fetchData();
+    fetchOEmbedData();
   }, [spotifyUrl]);
 
-  if (!oEmbedHtml) {
-    return <p>Loading...</p>;
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
   }
 
-  return <div dangerouslySetInnerHTML={{ __html: oEmbedHtml }} />;
+if (!oEmbedHtml && !error) {
+return (
+    <div className="animate-pulse bg-gray-200 rounded-lg w-full h-[152px] flex items-center justify-center">
+    <p className="text-gray-500">Loading Spotify player...</p>
+    </div>
+);
+}
+
+if (oEmbedHtml) {
+return <div dangerouslySetInnerHTML={{ __html: oEmbedHtml }} />;
+}
+
+return null;
 };
 
 export default SpotifyPlayer;

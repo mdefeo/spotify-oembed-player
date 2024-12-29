@@ -2,6 +2,33 @@
 
 A React and TypeScript application that provides an embeddable Spotify player using Spotify's oEmbed API. This project allows users to embed Spotify playlists, tracks, or episodes into their applications easily, with accessibility and responsiveness in mind.
 
+## Table of Contents
+
+- [Spotify oEmbed Player](#spotify-oembed-player)
+  - [Table of Contents](#table-of-contents)
+  - [Project Overview](#project-overview)
+  - [Features](#features)
+  - [Installation](#installation)
+    - [Prerequisites](#prerequisites)
+    - [Steps](#steps)
+  - [Usage](#usage)
+  - [Folder Structure](#folder-structure)
+  - [Development](#development)
+    - [Scripts](#scripts)
+    - [Testing](#testing)
+    - [Linting](#linting)
+  - [Contributing](#contributing)
+  - [Future Plans](#future-plans)
+  - [Changelog](#changelog)
+  - [License](#license)
+  - [Acknowledgments](#acknowledgments)
+  - [Getting Help](#getting-help)
+  - [Maintainers and Contributors](#maintainers-and-contributors)
+
+## Project Overview
+
+This project provides a reusable and accessible Spotify oEmbed player component built with React and TypeScript. It allows users to easily embed Spotify playlists, tracks, or episodes into their applications, ensuring accessibility and responsiveness.
+
 ## Features
 
 - Fetches oEmbed data from Spotify's oEmbed API.
@@ -34,12 +61,15 @@ A React and TypeScript application that provides an embeddable Spotify player us
 3. Create an `.env` file in the root directory with the following contents:
 
    ```env
-   SPOTIFY_CLIENT_ID=your-spotify-client-id
-   SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
+   SPOTIFY_CLIENT_ID=your_spotify_client_id
+   SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+   SPOTIFY_TOKEN_URL=https://accounts.spotify.com/api/token
+   SPOTIFY_OEMBED_URL=https://open.spotify.com/oembed
+   SPOTIFY_PLAYLIST=https://open.spotify.com/playlist/6fTj0s9lXElZY2NTY3thJF?utm_source=generator&theme=0
    NEXT_PUBLIC_BASE_URL=http://localhost:3000
    ```
 
-   Replace `your-spotify-client-id` and `your-spotify-client-secret` with your Spotify Developer credentials. For more details, visit [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/).
+   Replace `your_spotify_client_id` and `your_spotify_client_secret` with your Spotify Developer credentials. For more details, visit [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/).
 
 4. Run the development server:
 
@@ -71,27 +101,30 @@ To embed a Spotify playlist, track, or episode:
 
 ```plaintext
 spotify-oembed-player/
+├── public/
 ├── src/
+│   ├── __tests__/
+│   │   └── SpotifyPlayer.test.tsx
 │   ├── app/
 │   │   ├── api/
 │   │   │   ├── spotify-oembed/
 │   │   │   │   └── route.ts
 │   │   │   └── spotify-token/
 │   │   │       └── route.ts
+│   │   ├── layout.tsx
 │   │   └── page.tsx
 │   ├── components/
-│   │   ├── SpotifyPlayer.tsx
-│   │   └── SkeletonLoader.tsx
+│   │   ├── SkeletonLoader.tsx
+│   │   └── SpotifyPlayer.tsx
+│   ├── config/
+│   │   └── constants/
+│   │       └── spotify.ts
+│   ├── styles/
+│   │   └── globals.css
 │   ├── types/
 │   │   └── SpotifyPlayerProps.ts
-│   └── styles/
-│       └── globals.css
-├── public/
-├── .env.example
-├── jest.config.ts
-├── tsconfig.json
-├── README.md
-└── package.json
+│   └── utils/
+│       └── spotifyUtils.ts
 ```
 
 ## Development
@@ -103,6 +136,8 @@ spotify-oembed-player/
 - `yarn start`: Start the production server.
 - `yarn lint`: Run ESLint to find and fix issues.
 - `yarn test`: Run Jest tests.
+- `yarn test:watch`: Run Jest tests in watch mode.
+- `yarn test:coverage`: Run Jest tests with coverage report.
 
 ### Testing
 
@@ -116,8 +151,8 @@ This project uses Jest for testing.
 
 2. Tests are located in the `__tests__` folder. Example test file:
 
-   ```shell
-   src/__tests__/SpotifyPlayer.test.ts
+   ```plaintext
+   src/__tests__/SpotifyPlayer.test.tsx
    ```
 
 3. Mock data and API responses are used for testing.
@@ -132,15 +167,22 @@ yarn lint
 
 ## Contributing
 
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature-name`.
-3. Commit your changes: `git commit -m 'Add feature-name'`.
-4. Push to the branch: `git push origin feature-name`.
-5. Open a pull request.
+Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on the process for submitting pull requests to us.
+
+## Future Plans
+
+- Add support for dynamically embedding Spotify music.
+- Improve error handling and user feedback.
+- Add more customization options for the player.
+- Enhance test coverage and add more unit tests.
+
+## Changelog
+
+All notable changes to this project will be documented in this file. See the [Changelog](CHANGELOG.md) for details.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) file for details.
 
 ## Acknowledgments
 
@@ -148,3 +190,11 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - [Next.js](https://nextjs.org/)
 - [TailwindCSS](https://tailwindcss.com/)
 - [Jest](https://jestjs.io/)
+
+## Getting Help
+
+If you need help with this project, you can open an issue on the [GitHub Issues page](https://github.com/mdefeo/spotify-oembed-player/issues).
+
+## Maintainers and Contributors
+
+This project is maintained by Marcello De Feo. Contributions are welcome! Please see the [Contributing](#contributing) section for more details.

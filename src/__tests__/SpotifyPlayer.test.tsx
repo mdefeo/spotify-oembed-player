@@ -1,40 +1,89 @@
-// /src/__tests__/SpotifyPlayer.test.tsx
-import { fetchSpotifyOEmbedData } from "@/utils/spotifyUtils";
+// __tests__/SpotifyPlayer.test.tsx
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { act } from "@testing-library/react";
+import SpotifyPlayer from "@/components/SpotifyPlayer";
+import fetchMock from "jest-fetch-mock";
 
-describe("SpotifyPlayer Utility Functions", () => {
+// Helper to flush promises
+const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0));
+
+describe("SpotifyPlayer Component", () => {
   const spotifyUrl = "https://open.spotify.com/playlist/6fTj0s9lXElZY2NTY3thJF";
 
+  let container: HTMLDivElement;
+  let root: ReturnType<typeof createRoot>;
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
   afterEach(() => {
-    jest.restoreAllMocks();
+    act(() => {
+      root.unmount();
+    });
+    document.body.removeChild(container);
+    container = null!;
+    jest.clearAllMocks();
+    consoleErrorSpy.mockRestore();
   });
 
-  it("fetches and returns the Spotify oEmbed HTML", async () => {
-    const mockFetch = jest.spyOn(global, "fetch").mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        html: `<iframe src="${spotifyUrl}" width="100%" height="352" title="Spotify Player"></iframe>`,
-      }),
-    } as Response);
-
-    const html = await fetchSpotifyOEmbedData(spotifyUrl);
-
-    expect(mockFetch).toHaveBeenCalledWith(
-      `/api/spotify-oembed?url=${encodeURIComponent(spotifyUrl)}`
+  it("renders a loading message initially", async () => {
+    // Setup a delayed mock response to ensure we can check loading state
+    fetchMock.mockResponseOnce(
+      () => new Promise(resolve => setTimeout(() => resolve(JSON.stringify({ html: "<div>test</div>" })), 100))
     );
-    expect(html).toContain("iframe");
 
-    mockFetch.mockRestore();
+    await act(async () => {
+      root.render(<SpotifyPlayer spotifyUrl={spotifyUrl} />);
+    });
+
+    // Check loading state immediately after initial render
+    expect(container.querySelector(".animate-pulse")).not.toBeNull();
+
+    // Wait for the delayed response to complete
+    await act(async () => {
+      await flushPromises();
+    });
   });
 
-  it("throws an error when fetch fails", async () => {
-    const mockFetch = jest.spyOn(global, "fetch").mockResolvedValueOnce({
-      ok: false,
-    } as Response);
+  it("fetches and renders the Spotify iframe", async () => {
+    const mockHtml = `<iframe src="${spotifyUrl}" width="100%" height="352" title="Spotify Player"></iframe>`;
+    fetchMock.mockResponseOnce(JSON.stringify({ html: mockHtml }));
 
-    await expect(fetchSpotifyOEmbedData(spotifyUrl)).rejects.toThrow(
-      "Failed to fetch Spotify oEmbed data"
-    );
+    await act(async () => {
+      root.render(<SpotifyPlayer spotifyUrl={spotifyUrl} />);
+    });
 
-    mockFetch.mockRestore();
+    // Wait for all state updates to complete
+    await act(async () => {
+      await flushPromises();
+    });
+
+    const iframe = container.querySelector("iframe");
+    expect(iframe).not.toBeNull();
+    expect(iframe?.getAttribute("src")).toBe(spotifyUrl);
+    expect(iframe?.getAttribute("title")).toBe("Spotify Player");
+  });
+
+  it("renders an error message when fetch fails", async () => {
+    // Setup error mock before rendering
+    fetchMock.mockRejectOnce(new Error("Failed to fetch Spotify oEmbed data"));
+
+    await act(async () => {
+      root.render(<SpotifyPlayer spotifyUrl={spotifyUrl} />);
+    });
+
+    // Wait for error state to be set
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(container.textContent).toContain("Failed to load Spotify player.");
   });
 });
